@@ -44,7 +44,8 @@ class CodeCard extends StatelessWidget {
                   ),
                   margin: const EdgeInsets.all(0),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     child: Text(
                       fileName!,
                       // style: TextStyle(fontSize: 18),
@@ -86,7 +87,8 @@ class CodeCard extends StatelessWidget {
                     width: 80,
                     child: GradientElevatedButton(
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: code));
+                        if (code == null) return;
+                        Clipboard.setData(ClipboardData(text: code!));
 
                         showCopyFlash(
                           context: context,
@@ -125,7 +127,7 @@ class CodeCard extends StatelessWidget {
       CodeCard(
         code: '''
 dependencies:
-  flutter_form_bloc: ^0.30.1${extraDependencies == null ? '' : '\n${extraDependencies.substring(0, extraDependencies.length - 1)}'}
+  flutter_form_bloc: ^0.31.0${extraDependencies == null ? '' : '\n${extraDependencies.substring(0, extraDependencies.length - 1)}'}
 ''',
         fileName: 'pubspec.yaml',
         showCopyButton: true,

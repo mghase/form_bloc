@@ -589,12 +589,11 @@ abstract class SingleFieldBloc<
         .switchMap((value) async* {
       Object? error;
 
-      if (error == null) {
-        for (var asyncValidator in _asyncValidators) {
-          error = await asyncValidator(value);
-          if (error != null) break;
-        }
+      for (var asyncValidator in _asyncValidators) {
+        error = await asyncValidator(value);
+        if (error != null) break;
       }
+
       yield ValueAndError(value, error);
     }).listen((vls) {
       updateStateError(value: vls.value, error: vls.error);
@@ -610,11 +609,15 @@ abstract class SingleFieldBloc<
 
   @override
   Future<void> close() async {
+    // ignore: sdk_version_since
     unawaited(_selectedSuggestionSubject.close());
+    // ignore: sdk_version_since
     unawaited(_asyncValidatorsSubject.close());
+    // ignore: sdk_version_since
     unawaited(_asyncValidatorsSubscription.cancel());
     _revalidateFieldBlocsSubscription?.cancel();
 
+    // ignore: sdk_version_since
     unawaited(super.close());
   }
 
@@ -788,7 +791,7 @@ class MultiFieldBloc<ExtraData, TState extends MultiFieldBlocState<ExtraData>>
       fieldBlocs.every(_isFieldBlocValid);
 
   static bool areFieldBlocsValidating(Iterable<FieldBloc> fieldBlocs) =>
-      fieldBlocs.every(_isFieldBlocValidating);
+      fieldBlocs.isEmpty ? false : fieldBlocs.every(_isFieldBlocValidating);
 
   static bool _isFieldBlocValid(FieldBloc field) => field.state.isValid;
 

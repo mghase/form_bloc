@@ -6,7 +6,8 @@ import 'package:form_bloc_web/widgets/copy_flash.dart';
 import 'package:form_bloc_web/widgets/gradient_button.dart';
 
 class CodeScreen extends StatefulWidget {
-  const CodeScreen({Key? key,
+  const CodeScreen({
+    Key? key,
     this.codePath,
     this.extraDependencies,
   }) : super(key: key);
@@ -24,16 +25,18 @@ class CodeScreenState extends State<CodeScreen> {
 
   @override
   void didChangeDependencies() {
-    DefaultAssetBundle.of(context).loadString(widget.codePath!).catchError((_) {
-      setState(() {
-        _code = 'Example code not found';
-      });
-    }).then<void>((String? code) {
+    DefaultAssetBundle.of(context)
+        .loadString(widget.codePath!)
+        .then<void>((String? code) {
       if (mounted) {
         setState(() {
           _code = code ?? 'Example code not found';
         });
       }
+    }).catchError((_) {
+      setState(() {
+        _code = 'Example code not found';
+      });
     });
     super.didChangeDependencies();
   }
@@ -100,7 +103,8 @@ class CodeScreenState extends State<CodeScreen> {
   }
 
   void _copy() {
-    Clipboard.setData(ClipboardData(text: _code));
+    if (_code == null) return;
+    Clipboard.setData(ClipboardData(text: _code!));
 
     showCopyFlash(
       context: context,

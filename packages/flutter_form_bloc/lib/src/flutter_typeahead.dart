@@ -265,7 +265,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:rxdart/rxdart.dart';
 
 typedef FutureOr<List<T>> SuggestionsCallback<T>(String pattern);
@@ -629,7 +629,7 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
     //   this._suggestionsBox._overlayEntry?.remove();
     // }
     this._suggestionsBox!.widgetMounted = false;
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
 
     if (isWebMobile) {
       _keyboardSubscription.cancel();
@@ -648,12 +648,12 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
     super.dispose();
   }
 
-  // late final KeyboardVisibilityController keyboardVisibilityController;
+  late final KeyboardVisibilityController keyboardVisibilityController;
   late final bool isWebMobile;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _hideSuggestionsController = PublishSubject<void>();
 
     if (widget.textFieldConfiguration.controller == null) {
@@ -670,14 +670,15 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
         _SuggestionsBox(context, widget.direction, widget.autoFlipDirection);
     widget.suggestionsBoxController?._suggestionsBox = this._suggestionsBox;
     if (isWebMobile) {
-   //   keyboardVisibilityController = KeyboardVisibilityController();
-      // _keyboardSubscription = keyboardVisibilityController.onChange.listen((bool visible) {
-      //   setState(() {
-      //     if (widget.hideSuggestionsOnKeyboardHide && !visible) {
-      //       _effectiveFocusNode!.unfocus();
-      //     }
-      //   });
-      // });
+      keyboardVisibilityController = KeyboardVisibilityController();
+      _keyboardSubscription =
+          keyboardVisibilityController.onChange.listen((bool visible) {
+        setState(() {
+          if (widget.hideSuggestionsOnKeyboardHide && !visible) {
+            _effectiveFocusNode!.unfocus();
+          }
+        });
+      });
     }
 
     this._focusNodeListener = () {
@@ -688,7 +689,7 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
       }
     };
 
-    WidgetsBinding.instance!.addPostFrameCallback((duration) {
+    WidgetsBinding.instance.addPostFrameCallback((duration) {
       if (mounted) {
         this._initOverlayEntry();
         // calculate initial suggestions list size
@@ -701,9 +702,8 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
           this._suggestionsBox?.open();
         }
 
-        ScrollableState? scrollableState = Scrollable.of(context);
+        ScrollableState? scrollableState = Scrollable.maybeOf(context);
         if (scrollableState != null) {
-          // The TypeAheadField is inside a scrollable widget
           scrollableState.position.isScrollingNotifier.addListener(() {
             bool isScrolling =
                 scrollableState.position.isScrollingNotifier.value;
@@ -727,7 +727,7 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
   /// TODO: Create Pull Request
   /// Called for resize the suggestions box when have error
   void _onChange() {
-    WidgetsBinding.instance!.addPostFrameCallback((duration) {
+    WidgetsBinding.instance.addPostFrameCallback((duration) {
       _suggestionsBox!.resize();
     });
   }
@@ -865,6 +865,7 @@ class _TypeAheadFieldState<T> extends State<TypeAheadField<T>>
         showCursor: widget.textFieldConfiguration.showCursor,
         strutStyle: widget.textFieldConfiguration.strutStyle,
         textAlignVertical: widget.textFieldConfiguration.textAlignVertical,
+        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
         toolbarOptions: widget.textFieldConfiguration.toolbarOptions,
       ),
     );
@@ -981,7 +982,7 @@ class _SuggestionsListState<T> extends State<_SuggestionsList<T>>
     widget.controller!.addListener(this._controllerListener);
 
     _hideSuggestionsSubscription = widget.hideSuggestions.listen((_) {
-      WidgetsBinding.instance!.addPostFrameCallback((duration) {
+      WidgetsBinding.instance.addPostFrameCallback((duration) {
         if (this.mounted) {
           setState(() {
             this
@@ -1204,7 +1205,7 @@ class _SuggestionsListState<T> extends State<_SuggestionsList<T>>
             padding: const EdgeInsets.all(8.0),
             child: Text(
               'Error: ${this._error}',
-              style: TextStyle(color: Theme.of(context).errorColor),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           );
   }
@@ -1248,7 +1249,6 @@ class _SuggestionsListState<T> extends State<_SuggestionsList<T>>
       }
 
       return InkWell(
-        child: widget.itemBuilder!(context, suggestion),
         borderRadius: borderRadius,
         onLongPress: widget.onSuggestionRemoved == null ||
                 !widget.removeSuggestionOnLongPress
@@ -1269,6 +1269,7 @@ class _SuggestionsListState<T> extends State<_SuggestionsList<T>>
         onTap: () {
           widget.onSuggestionSelected!(suggestion);
         },
+        child: widget.itemBuilder!(context, suggestion),
       );
     }
 
@@ -1557,6 +1558,10 @@ class TextFieldConfiguration<T> {
   /// If not set, select all and paste will default to be enabled. Copy and cut
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   final ToolbarOptions? toolbarOptions;
   final Iterable<String>? autofillHints;
 
@@ -1686,7 +1691,7 @@ class _SuggestionsBox {
   void open() {
     if (this._isOpened) return;
     assert(this._overlayEntry != null);
-    Overlay.of(context)!.insert(this._overlayEntry!);
+    Overlay.of(context).insert(this._overlayEntry!);
     this._isOpened = true;
   }
 
